@@ -2,7 +2,7 @@ const DECORATORS_PREFIX = 'asyncapi';
 
 export const DECORATORS = {
   AsyncApiClass: `${DECORATORS_PREFIX}/class`,
+  AsyncApiChannel: `${DECORATORS_PREFIX}/channel`,
   AsyncApiOperation: `${DECORATORS_PREFIX}/operation`,
-  AsyncApiPub: `${DECORATORS_PREFIX}/pub`,
-  AsyncApiSub: `${DECORATORS_PREFIX}/sub`,
+  AsyncApiMessage: `${DECORATORS_PREFIX}/message`,
 };

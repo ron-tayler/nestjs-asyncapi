@@ -31,12 +31,11 @@ export class AsyncapiScanner {
   public scanApplication(
     app: INestApplicationContext,
     options: AsyncApiDocumentOptions,
-  ): Omit<AsyncApiDocument, 'asyncapi' | 'info'> {
+  ): Pick<AsyncApiDocument, 'channels' | 'operations' | 'components'> {
     const {
       deepScanRoutes,
       include: includedModules = [],
       extraModels = [],
-      ignoreGlobalPrefix = false,
       operationIdFactory,
     } = options;
 
@@ -45,78 +44,73 @@ export class AsyncapiScanner {
       container.getModules(),
       includedModules,
     );
-    const globalPrefix = !ignoreGlobalPrefix
-      ? stripLastSlash(this.getGlobalPrefix(app))
-      : '';
 
-    const denormalizedChannels = modules.reduce(
-      (channels, { providers, metatype, imports, controllers }) => {
-        let allProviders = new Map([...providers, ...controllers]);
+    const providers = modules
+      .map((module) =>
+        this.getModuleProviders(container, module, deepScanRoutes),
+      )
+      .map((providers) => [...providers.values()])
+      .flat();
 
-        if (deepScanRoutes) {
-          // only load submodules routes if asked
-          const isGlobal = (module: Type<any>) =>
-            !container.isGlobalModule(module);
-
-          Array.from(imports.values())
-            .filter(isGlobal as any)
-            .map(
-              ({
-                providers: relatedProviders,
-                controllers: relatedControllers,
-              }) => ({
-                relatedProviders,
-                relatedControllers,
-              }),
-            )
-            .forEach(({ relatedProviders, relatedControllers }) => {
-              allProviders = new Map([
-                ...allProviders,
-                ...relatedProviders,
-                ...relatedControllers,
-              ]);
-            });
-        }
-        const path = metatype
-          ? Reflect.getMetadata(MODULE_PATH, metatype)
-          : undefined;
-
-        return [
-          ...channels,
-          ...this.scanModuleProviders(
-            allProviders,
-            path,
-            globalPrefix,
-            operationIdFactory,
-          ),
-        ];
-      },
-      [],
+    const denormalizedChannels = this.scanModuleProviders(
+      providers,
+      operationIdFactory,
     );
 
     const schemas = this.explorer.getSchemas();
     this.addExtraModels(schemas, extraModels);
-    const normalizedChannels = this.transformer.normalizeChannels(
-      flatten(denormalizedChannels),
-    );
+    const { channels: normalizedChannels } =
+      this.transformer.normalizeChannels(denormalizedChannels);
     return {
-      ...normalizedChannels,
-      components: { schemas },
+      channels: normalizedChannels,
+      components: {
+        schemas,
+      },
     };
   }
 
+  private getModuleProviders(
+    container: NestContainer,
+    { providers, controllers, imports }: Module,
+    deepScanRoutes: boolean = false,
+  ): Map<InjectionToken, InstanceWrapper<unknown>> {
+    let allProviders = new Map([...providers, ...controllers]);
+
+    if (deepScanRoutes) {
+      // only load submodules routes if asked
+      const isGlobal = (module: Type) => !container.isGlobalModule(module);
+
+      Array.from(imports.values())
+        .filter(isGlobal as any)
+        .map(
+          ({
+            providers: relatedProviders,
+            controllers: relatedControllers,
+          }) => ({
+            relatedProviders,
+            relatedControllers,
+          }),
+        )
+        .forEach(({ relatedProviders, relatedControllers }) => {
+          allProviders = new Map([
+            ...allProviders,
+            ...relatedProviders,
+            ...relatedControllers,
+          ]);
+        });
+    }
+
+    return allProviders;
+  }
+
   private scanModuleProviders(
-    providers: Map<InjectionToken, InstanceWrapper<Injectable>>,
-    modulePath?: string,
-    globalPrefix?: string,
+    providers: InstanceWrapper<Injectable>[],
     operationIdFactory?: (controllerKey: string, methodKey: string) => string,
   ): DenormalizedDoc[] {
-    const denormalizedArray = [...providers.values()].reduce(
-      (denormalized, prov) => {
+    const denormalizedArray = providers.reduce<DenormalizedDoc[]>(
+      (denormalized, provider) => {
         const object = this.explorer.explorerAsyncapiServices(
-          prov,
-          modulePath,
-          globalPrefix,
+          provider,
           operationIdFactory,
         );
         return [...denormalized, ...object];
@@ -124,7 +118,7 @@ export class AsyncapiScanner {
       [],
     );
 
-    return flatten(denormalizedArray) as any;
+    return flatten(denormalizedArray);
   }
 
   private getModules(

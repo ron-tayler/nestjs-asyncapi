@@ -6,5 +6,8 @@ import {
 
 export interface DenormalizedDoc extends Partial<AsyncApiDocument> {
   root?: { name: string } & AsyncChannelObject;
-  operations?: { pub: AsyncOperationObject; sub: AsyncOperationObject };
+  // v2 structure
+  operations?: { pub?: AsyncOperationObject; sub?: AsyncOperationObject };
+  // v3 structure
+  v3Operations?: Array<{ action: 'send' | 'receive'; operation: AsyncOperationObject; channel: string }>;
 }

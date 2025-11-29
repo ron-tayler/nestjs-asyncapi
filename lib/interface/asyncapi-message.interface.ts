@@ -1,3 +1,4 @@
+import { AsyncMessageObject } from './asyncapi-common.interfaces';
 import { AsyncApiOperationHeaders } from './asyncapi-operation-headers.interface';
 import { AsyncOperationPayload } from './asyncapi-operation-payload.interface';
 
@@ -7,4 +8,6 @@ export interface OneAsyncApiMessage {
   headers?: AsyncApiOperationHeaders;
 }
 
-export type AsyncApiMessage = OneAsyncApiMessage | OneAsyncApiMessage[];
+export interface OneOfMessageType {
+  oneOf: AsyncMessageObject[];
+}

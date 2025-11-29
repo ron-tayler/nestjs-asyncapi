@@ -22,8 +22,6 @@ export class AsyncApiExplorer {
 
   public explorerAsyncapiServices(
     wrapper: InstanceWrapper,
-    modulePath?: string,
-    globalPrefix?: string,
     operationIdFactory?: (controllerKey: string, methodKey: string) => string,
   ) {
     if (operationIdFactory) {
@@ -58,8 +56,6 @@ export class AsyncApiExplorer {
       prototype,
       instance,
       documentResolvers,
-      modulePath,
-      globalPrefix,
     );
   }
 
@@ -73,8 +69,6 @@ export class AsyncApiExplorer {
     prototype: Type<unknown>,
     instance: object,
     documentResolvers: DenormalizedDocResolvers,
-    _modulePath?: string,
-    _globalPrefix?: string,
   ): DenormalizedDoc[] {
     const denormalizedAsyncapiServices = this.metadataScanner.scanFromPrototype<
       unknown,

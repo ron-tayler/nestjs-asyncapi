@@ -1,11 +1,8 @@
 import { MessageTraitObject } from '@asyncapi/parser/esm/spec-types/v3';
-import { OneAsyncApiMessage } from './asyncapi-message.interface';
 import { AsyncOperationPayload } from './asyncapi-operation-payload.interface';
 
-export interface AsyncApiSpecificOperationOptions
+export interface AsyncApiSpecificMessageOptions
   extends Omit<MessageTraitObject, 'payload'> {
   payload: AsyncOperationPayload;
-  message: OneAsyncApiMessage | OneAsyncApiMessage[];
-  channel: string;
-  action: 'send' | 'receive';
+  channel?: string;
 }

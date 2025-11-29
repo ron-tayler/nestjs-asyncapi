@@ -2,6 +2,7 @@ import {
   AsyncChannelObject,
   AsyncChannelsObject,
   DenormalizedDoc,
+  AsyncOperationsObject,
 } from '../interface';
 
 export class AsyncapiTransformer {

@@ -1,9 +1,19 @@
+import { createMixedDecorator } from '@nestjs/swagger/dist/decorators/helpers';
 import { DECORATORS } from '../asyncapi.constants';
-import { AsyncApiOperationOptions } from '../interface';
-import { AsyncApiOperationForMetaKey } from './asyncapi-operation-for-meta-key.decorator';
+import { AsyncApiSpecificOperationOptions } from '../interface';
 
+/**
+ * @deprecated Не завершён и работает не корректно
+ * @todo
+ * */
 export function AsyncApiOperation(
-  ...options: AsyncApiOperationOptions[]
+  options: AsyncApiSpecificOperationOptions,
 ): MethodDecorator {
-  return AsyncApiOperationForMetaKey(DECORATORS.AsyncApiOperation, options);
+  return (target, propertyKey: string | symbol, descriptor) => {
+    return createMixedDecorator(DECORATORS.AsyncApiOperation, [options])(
+      target,
+      propertyKey,
+      descriptor,
+    );
+  };
 }
