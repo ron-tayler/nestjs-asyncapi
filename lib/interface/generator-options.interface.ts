@@ -14,7 +14,7 @@ export interface GeneratorOptions {
   templateConfig: Record<string, unknown>;
   hooks: Record<string, unknown>;
   templateParams: AsyncApiTemplateOptions;
-  generate: (document: AsyncAPIObject) => Promise<void>;
+  generate: (document: AsyncAPIObject, args?: unknown) => Promise<void>;
   generateFromURL: (url: string) => Promise<void>;
   generateFromFile: (path: string) => Promise<void>;
   generateFromString: (yaml: string, args?: unknown) => Promise<string>;
