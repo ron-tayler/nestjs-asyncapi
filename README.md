@@ -1,32 +1,66 @@
-## Description
+## Описание
 
-[AsyncApi](https://www.asyncapi.com/) module for [Nest](https://github.com/nestjs/nest).
+Модуль [AsyncAPI](https://www.asyncapi.com/) для [Nest](https://github.com/nestjs/nest).
 
-Generate [AsyncApi](https://www.asyncapi.com/) documentation (for event-based services, like websockets) in a similar
-to [nestjs/swagger](https://github.com/nestjs/swagger) fashion.
+Генерация документации [AsyncAPI v3.0.0](https://www.asyncapi.com/) (для событийно-ориентированных сервисов, таких как websockets) аналогично
+тому, как это делается в [nestjs/swagger](https://github.com/nestjs/swagger).
 
-### [Live Preview](https://flamewow.github.io/nestjs-asyncapi/live-preview)
+Этот модуль генерирует спецификацию AsyncAPI в формате **версии 3.0.0**, которая вводит новую структуру с отдельными определениями `operations` и `channels`, обеспечивая большую гибкость и лучшую организацию событийно-ориентированных API.
 
-[AsyncApi playground](https://playground.asyncapi.io/?load=https://raw.githubusercontent.com/asyncapi/asyncapi/v2.1.0/examples/simple.yml)
+> **Примечание**: Это форк оригинального проекта [nestjs-asyncapi](https://github.com/flamewow/nestjs-asyncapi), обновленный для поддержки AsyncAPI v3.0.0. Оригинальная версия поддерживает AsyncAPI v2.x.
 
-## Installation
+### [Живой пример](https://flamewow.github.io/nestjs-asyncapi/live-preview)
 
-full installation (with chromium)
+[AsyncAPI Playground](https://playground.asyncapi.io/) - Тестируйте ваши спецификации AsyncAPI v3.0.0
+
+## Установка
+
+> **Важно**: Эта версия не опубликована в npm, так как является форком с поддержкой AsyncAPI v3.0.0. Установка производится из исходников.
+
+### Установка из исходников
+
+1. Клонируйте репозиторий:
 
 ```bash
-$ npm i --save nestjs-asyncapi
+$ git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ>
+$ cd nestjs-asyncapi
 ```
 
-nestjs-async api package doesn't require chromium (which is required by asyncapi lib), so u can skip chromium
-installation by setting PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true environment variable.
+2. Установите зависимости и соберите проект:
 
 ```bash
-$ PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm i --save nestjs-asyncapi
+$ npm install
+$ npm run build
 ```
 
-## Quick Start
+3. В вашем проекте установите пакет локально:
 
-Include AsyncApi initialization into your bootstrap function.
+```bash
+$ npm install --save <ПУТЬ_К_КЛОНИРОВАННОМУ_РЕПОЗИТОРИЮ>
+```
+
+Или используйте прямой путь в `package.json`:
+
+```json
+{
+  "dependencies": {
+    "nestjs-asyncapi": "file:../path/to/nestjs-asyncapi"
+  }
+}
+```
+
+### Пропуск установки Chromium
+
+Пакет nestjs-asyncapi не требует chromium (который требуется библиотекой asyncapi), поэтому вы можете пропустить установку chromium,
+установив переменную окружения `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true` перед установкой зависимостей:
+
+```bash
+$ PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
+```
+
+## Быстрый старт
+
+Добавьте инициализацию AsyncAPI в вашу функцию bootstrap.
 
 ```typescript
 async function bootstrap() {
@@ -47,51 +81,93 @@ async function bootstrap() {
     const asyncapiDocument = await AsyncApiModule.createDocument(app, asyncApiOptions);
     await AsyncApiModule.setup(docRelPath, app, asyncapiDocument);
 
-    // other bootstrap procedures here
+    // другие процедуры инициализации здесь
 
     return app.listen(3000);
 }
 ```
 
-AsyncApi module explores `Controllers` & `WebSocketGateway` by default.
-In most cases you won't need to add extra annotation,
-but if you need to define asyncApi operations in a class that's not a controller or gateway use the `AsyncApi` class
-decorator.
+Модуль AsyncAPI по умолчанию сканирует `Controllers` и `WebSocketGateway`.
+В большинстве случаев вам не нужно добавлять дополнительные аннотации,
+но если вам нужно определить операции AsyncAPI в классе, который не является контроллером или шлюзом, используйте декоратор класса `@AsyncApi()`.
 
-Mark pub/sub methods via `AsyncApiPub` or `AsyncApiSub` decorators<br/>
+### Определение каналов и сообщений
+
+В AsyncAPI v3.0.0 каналы и сообщения определяются отдельно. Используйте декоратор `@AsyncApiChannel()` для определения каналов
+и декоратор `@AsyncApiMessage()` для определения сообщений с их связанными каналами.
 
 ```typescript
+import { ApiProperty } from '@nestjs/swagger';
+import { Controller } from '@nestjs/common';
+import { AsyncApiChannel, AsyncApiMessage } from 'nestjs-asyncapi';
+
 class CreateFelineDto {
     @ApiProperty()
     demo: string;
 }
 
 @Controller()
+@AsyncApiChannel('create/feline')
 class DemoController {
-    @AsyncApiPub({
+    @AsyncApiMessage({
         channel: 'create/feline',
-        message: {
-            payload: CreateFelineDto
-        },
+        payload: CreateFelineDto,
+        name: 'createFelineMessage',
+        summary: 'Сообщение, отправляемое при создании нового кота',
     })
     async createFeline() {
-        // logic here
-    }
-
-    @AsyncApiSub({
-        channel: 'create/feline',
-        message: {
-            payload: CreateFelineDto
-        },
-    })
-    async createFeline() {
-        // logic here
+        // логика здесь
     }
 }
-
 ```
 
-For more detailed examples please check out https://github.com/flamewow/nestjs-asyncapi/tree/main/sample sample app.
+### Конфигурация каналов
 
-<h5>Do you use this library and like it? Don't be shy to give it a star
-on <a href="https://github.com/flamewow/nestjs-asyncapi">github <span>★</span></a></h3>
+Вы также можете настроить каналы с дополнительными опциями:
+
+```typescript
+@AsyncApiChannel({
+    name: 'user/events',
+    address: 'user/events',
+    description: 'Канал для событий, связанных с пользователями',
+})
+class UserController {
+    @AsyncApiMessage({
+        channel: 'user/events',
+        payload: UserEventDto,
+    })
+    async handleUserEvent() {
+        // логика здесь
+    }
+}
+```
+
+## Возможности AsyncAPI v3.0.0
+
+Этот модуль генерирует спецификацию AsyncAPI в формате версии 3.0.0, которая включает:
+
+- **Отдельные операции и каналы**: Операции и каналы теперь определяются отдельно, обеспечивая лучшую организацию
+- **Гибкие определения сообщений**: Сообщения могут быть определены независимо и ссылаться в каналах
+- **Улучшенные компоненты**: Улучшенная структура компонентов для лучшей переиспользуемости
+- **Обратная совместимость**: Хотя формат v3.0.0, API остается похожим на предыдущие версии
+
+## API эндпоинты
+
+После настройки доступны следующие эндпоинты:
+
+- `GET /{docPath}-json` - Возвращает документ AsyncAPI в формате JSON
+- `GET /{docPath}-yaml` - Возвращает документ AsyncAPI в формате YAML
+
+## Дополнительные ресурсы
+
+Для более подробных примеров, пожалуйста, ознакомьтесь с [примером приложения](https://github.com/flamewow/nestjs-asyncapi/tree/main/sample).
+
+Узнайте больше об AsyncAPI v3.0.0:
+- [Документация AsyncAPI](https://www.asyncapi.com/docs)
+- [Миграция на AsyncAPI v3.0](https://www.asyncapi.com/docs/migration/migrating-to-v3)
+- [Спецификация AsyncAPI v3.0.0](https://www.asyncapi.com/docs/specifications/v3.0.0)
+
+---
+
+<h5>Используете эту библиотеку и она вам нравится? Не стесняйтесь поставить звезду
+на <a href="https://github.com/flamewow/nestjs-asyncapi">GitHub <span>★</span></a></h5>
