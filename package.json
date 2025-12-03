@@ -4,8 +4,8 @@
   "description": "NestJS AsyncAPI module - generate documentation of your event-based services using decorators",
   "author": "Ilya Moroz",
   "license": "MIT",
-  "main": "./dist/lib/index.js",
-  "types": "./dist/lib/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/flamewow/nestjs-asyncapi"
