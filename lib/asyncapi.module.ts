@@ -53,14 +53,14 @@ export class AsyncApiModule {
     const httpAdapter = app.getHttpAdapter();
     const finalPath = validatePath(path);
 
-    const html = await this.composeHtml(document, templateOptions);
+    // const html = await this.composeHtml(document, templateOptions);
     const yamlDocument = jsyaml.dump(document);
     const jsonDocument = JSON.stringify(document);
 
-    httpAdapter.get(finalPath, (req, res) => {
-      res.type('text/html');
-      res.send(html);
-    });
+    // httpAdapter.get(finalPath, (req, res) => {
+    //   res.type('text/html');
+    //   res.send(html);
+    // });
 
     httpAdapter.get(finalPath + '-json', (req, res) => {
       res.type('application/json');
