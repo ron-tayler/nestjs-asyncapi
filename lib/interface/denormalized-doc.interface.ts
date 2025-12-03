@@ -1,13 +1,7 @@
-import {
-  AsyncApiDocument,
-  AsyncChannelObject,
-  AsyncOperationObject,
-} from './asyncapi-common.interfaces';
+import { AsyncapiChannelOptions } from './asyncapi-channel-options.interface';
+import { AsyncApiSpecificMessageOptions } from './asyncapi-message-options.interface';
 
-export interface DenormalizedDoc extends Partial<AsyncApiDocument> {
-  root?: { name: string } & AsyncChannelObject;
-  // v2 structure
-  operations?: { pub?: AsyncOperationObject; sub?: AsyncOperationObject };
-  // v3 structure
-  v3Operations?: Array<{ action: 'send' | 'receive'; operation: AsyncOperationObject; channel: string }>;
+export interface DenormalizedDoc {
+  channels: AsyncapiChannelOptions[];
+  messages: AsyncApiSpecificMessageOptions[];
 }

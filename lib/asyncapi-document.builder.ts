@@ -1,34 +1,25 @@
 import {
+  AsyncAPIObject,
   ExternalDocumentationObject,
-  SecuritySchemeObject,
-  TagObject,
-} from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
-import { isUndefined, negate, pickBy } from 'lodash';
-import {
-  AsyncApiDocument,
-  AsyncSecuritySchemeObject,
-  AsyncServerObject,
-} from './interface';
+  ServerObject,
+} from '@asyncapi/parser/esm/spec-types/v3';
 
 export class AsyncApiDocumentBuilder {
-  private readonly buildDocumentBase = (): Omit<
-    AsyncApiDocument,
-    'channels'
-  > => ({
-    asyncapi: '3.0.0',
-    info: {
-      title: '',
-      description: '',
-      version: '1.0.0',
-      contact: {},
-    },
-    tags: [],
-    servers: {},
-    components: {},
-  });
+  private readonly buildDocumentBase = (): AsyncAPIObject =>
+    ({
+      asyncapi: '3.0.0',
+      info: {
+        title: '',
+        description: '',
+        version: '1.0.0',
+        contact: {},
+        tags: [],
+      },
+      servers: {},
+      components: {},
+    }) satisfies AsyncAPIObject;
 
-  private readonly document: Omit<AsyncApiDocument, 'channels'> =
-    this.buildDocumentBase();
+  private readonly document = this.buildDocumentBase();
 
   public setTitle(title: string): this {
     this.document.info.title = title;
@@ -60,14 +51,12 @@ export class AsyncApiDocumentBuilder {
     return this;
   }
 
-  public addServer(name: string, server: AsyncServerObject): this {
-    this.document.servers[name] = server;
+  public addServer(name: string, server: ServerObject): this {
+    this.document.servers![name] = server;
     return this;
   }
 
-  public addServers(
-    servers: { name: string; server: AsyncServerObject }[],
-  ): this {
+  public addServers(servers: { name: string; server: ServerObject }[]): this {
     for (const { name, server } of servers) {
       this.addServer(name, server);
     }
@@ -76,7 +65,7 @@ export class AsyncApiDocumentBuilder {
   }
 
   public setExternalDoc(description: string, url: string): this {
-    this.document.externalDocs = { description, url };
+    this.document.info.externalDocs = { description, url };
     return this;
   }
 
@@ -90,101 +79,15 @@ export class AsyncApiDocumentBuilder {
     description = '',
     externalDocs?: ExternalDocumentationObject,
   ): this {
-    this.document.tags = this.document.tags.concat(
-      pickBy(
-        {
-          name,
-          description,
-          externalDocs,
-        },
-        negate(isUndefined),
-      ) as TagObject,
-    );
-    return this;
-  }
-
-  public addSecurity(name: string, options: AsyncSecuritySchemeObject): this {
-    this.document.components.securitySchemes = {
-      ...(this.document.components.securitySchemes || {}),
-      [name]: options,
-    };
-    return this;
-  }
-
-  public addBearerAuth(
-    options: SecuritySchemeObject = {
-      type: 'http',
-    },
-    name = 'bearer',
-  ): this {
-    this.addSecurity(name, {
-      scheme: 'bearer',
-      bearerFormat: 'JWT',
-      ...options,
-    });
-    return this;
-  }
-
-  public addOAuth2(
-    options: SecuritySchemeObject = {
-      type: 'oauth2',
-    },
-    name = 'oauth2',
-  ): this {
-    this.addSecurity(name, {
-      type: 'oauth2',
-      flows: {},
-      ...options,
-    });
-    return this;
-  }
-
-  public addApiKey(
-    options: SecuritySchemeObject = {
-      type: 'apiKey',
-    },
-    name = 'api_key',
-  ): this {
-    this.addSecurity(name, {
-      type: 'apiKey',
-      in: 'header',
+    this.document.info.tags = this.document.info.tags!.concat({
       name,
-      ...options,
+      description,
+      externalDocs,
     });
     return this;
   }
 
-  public addBasicAuth(
-    options: SecuritySchemeObject = {
-      type: 'http',
-    },
-    name = 'basic',
-  ): this {
-    this.addSecurity(name, {
-      type: 'http',
-      scheme: 'basic',
-      ...options,
-    });
-    return this;
-  }
-
-  public addCookieAuth(
-    cookieName = 'connect.sid',
-    options: SecuritySchemeObject = {
-      type: 'apiKey',
-    },
-    securityName = 'cookie',
-  ): this {
-    this.addSecurity(securityName, {
-      type: 'apiKey',
-      in: 'cookie',
-      name: cookieName,
-      ...options,
-    });
-    return this;
-  }
-
-  public build(): Omit<AsyncApiDocument, 'components' | 'channels'> {
+  public build(): Omit<AsyncAPIObject, 'components' | 'channels'> {
     return this.document;
   }
 }

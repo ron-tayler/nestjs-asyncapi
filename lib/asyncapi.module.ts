@@ -1,3 +1,4 @@
+import { AsyncAPIObject } from '@asyncapi/parser/esm/spec-types/v3';
 import {
   INestApplication,
   INestApplicationContext,
@@ -5,11 +6,7 @@ import {
 } from '@nestjs/common';
 import { validatePath } from '@nestjs/swagger/dist/utils/validate-path.util';
 import jsyaml from 'js-yaml';
-import {
-  AsyncApiDocument,
-  AsyncApiDocumentOptions,
-  AsyncApiTemplateOptions,
-} from './interface';
+import { AsyncApiDocumentOptions, AsyncApiTemplateOptions } from './interface';
 import { AsyncapiGenerator, AsyncapiScanner } from './services';
 
 export class AsyncApiModule {
@@ -17,9 +14,9 @@ export class AsyncApiModule {
 
   public static createDocument(
     app: INestApplicationContext,
-    config: Omit<AsyncApiDocument, 'channels'>,
+    config: Omit<AsyncAPIObject, 'channels'>,
     options: AsyncApiDocumentOptions = {},
-  ): AsyncApiDocument {
+  ): AsyncAPIObject {
     const asyncapiScanner = new AsyncapiScanner();
     const document = asyncapiScanner.scanApplication(app, options);
 
@@ -29,14 +26,13 @@ export class AsyncApiModule {
     };
 
     return {
-      asyncapi: '3.0.0',
       ...config,
       ...document,
     };
   }
 
   static async composeHtml(
-    contract: AsyncApiDocument,
+    contract: AsyncAPIObject,
     templateOptions?: AsyncApiTemplateOptions,
   ) {
     const generator = new AsyncapiGenerator(templateOptions);
@@ -49,7 +45,7 @@ export class AsyncApiModule {
   public static async setup(
     path: string,
     app: INestApplication,
-    document: AsyncApiDocument,
+    document: AsyncAPIObject,
     templateOptions?: AsyncApiTemplateOptions,
   ) {
     const httpAdapter = app.getHttpAdapter();

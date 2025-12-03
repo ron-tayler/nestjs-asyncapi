@@ -1,11 +1,8 @@
 import Generator from '@asyncapi/generator';
+import { AsyncAPIObject } from '@asyncapi/parser/esm/spec-types/v3';
 import jsyaml from 'js-yaml';
 import os from 'os';
-import {
-  AsyncApiDocument,
-  AsyncApiTemplateOptions,
-  GeneratorOptions,
-} from '../interface';
+import { AsyncApiTemplateOptions, GeneratorOptions } from '../interface';
 
 export class AsyncapiGenerator {
   private readonly generator: GeneratorOptions;
@@ -22,7 +19,7 @@ export class AsyncapiGenerator {
     });
   }
 
-  public async generate(contract: AsyncApiDocument): Promise<string> {
+  public async generate(contract: AsyncAPIObject): Promise<string> {
     const yaml = jsyaml.dump(contract);
     return this.generator.generateFromString(yaml, {
       resolve: {

@@ -9,5 +9,5 @@ export function AsyncApiChannel(name: string | AsyncapiChannelOptions) {
   const options: AsyncapiChannelOptions =
     typeof name == 'string' ? { name } : name;
 
-  return createMixedDecorator(DECORATORS.AsyncApiChannel, options);
+  return createMixedDecorator(DECORATORS.AsyncApiChannel, [options]);
 }

@@ -78,7 +78,8 @@
     "ts-loader": "9.5.1",
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "rimraf": "^5.0.1"
   },
   "config": {
     "puppeteer_skip_chromium_download": true
@@ -90,7 +91,7 @@
     ]
   },
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "build": "rimraf ./dist && tsc -p tsconfig.build.json",
     "prepare": "husky install",
     "format": "prettier --write \"lib/**/*.{js,ts,json}\"  \"e2e/**/*.{js,ts,json}\"",
     "lint": "eslint --fix \"lib/**/*.ts\"  \"sample/**/*.ts\" \"test/**/*.ts\"",
