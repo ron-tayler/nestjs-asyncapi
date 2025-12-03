@@ -61,12 +61,12 @@ export class AsyncApiObjectFactory {
   getAsyncApiObject(): Readonly<
     Pick<AsyncAPIObject, 'channels' | 'operations' | 'components'>
   > {
-    return Object.freeze({
+    return {
       ...this.asyncApiObject,
       components: {
         schemas: this.schemas,
       },
-    });
+    };
   }
 
   private exploreModelSchema(payload: AsyncMessagePayload): string {

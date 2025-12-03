@@ -18,11 +18,13 @@ export class AsyncApiModule {
     options: AsyncApiDocumentOptions = {},
   ): AsyncAPIObject {
     const asyncapiScanner = new AsyncapiScanner();
-    const document = asyncapiScanner.scanApplication(app, options);
-
-    document.components = {
-      ...(config.components || {}),
-      ...document.components,
+    const scannedDocument = asyncapiScanner.scanApplication(app, options);
+    const document = {
+      ...scannedDocument,
+      components: {
+        ...(config.components || {}),
+        ...scannedDocument.components,
+      },
     };
 
     return {
