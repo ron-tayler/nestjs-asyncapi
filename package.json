@@ -38,8 +38,9 @@
     }
   },
   "dependencies": {
+    "@asyncapi/cli": "^4.1.1",
     "@asyncapi/generator": "^2.8.4",
-    "@asyncapi/html-template": "^3.3.1",
+    "@asyncapi/html-template": "^2.3.14",
     "js-yaml": "^4.1.1",
     "lodash": "^4.17.21",
     "reflect-metadata": "0.2.1"
